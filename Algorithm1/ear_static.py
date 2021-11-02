@@ -1,7 +1,7 @@
 # CODE AUTHORED BY ARJUN SRIDHAR
 # PARTS OF CODE ADAPTED FROM: https://www.pyimagesearch.com/2017/04/24/eye-blink-detection-opencv-python-dlib/
 # CODE THAT CLASSIFIES USING EYE-ASPECT RATIO (EAR) METHOD USING STATIC THRESHOLD AND CONSECUTIVE NUMBER OF FRAMES
-# DEPENDENCIES - SHAPE PREDICTOR FILE
+# DEPENDENCIES - SHAPE PREDICTOR FILE, download here http://dlib.net/files/shape_predictor_68_face_landmarks.dat.bz
 
 # import the necessary packages
 import pandas as pd
