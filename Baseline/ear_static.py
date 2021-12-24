@@ -12,6 +12,7 @@ import imutils
 import time
 import dlib
 import cv2
+import time
 
 # computes the eye aspect ratio (EAR) value for the given eye frame
 # inputs - the eye frame 
@@ -153,7 +154,6 @@ def predict(args):
     # create dataframe and write output
     df = pd.DataFrame.from_dict(data_dict)
     df.to_csv('./ear_static.csv', index=False)
-    
 
 if __name__ == '__main__':
     # construct the argument parse and parse the arguments
@@ -163,4 +163,6 @@ if __name__ == '__main__':
     ap.add_argument("-v", "--video", type=str, default="",
         help="path to input video file")
     args = vars(ap.parse_args())
+    start_time = time.time()
     predict(args)
+    print("Time taken: ", time.time() - start_time, " s")

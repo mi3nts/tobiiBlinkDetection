@@ -1,66 +1,20 @@
-# CODE AUTHORED BY ARJUN SRIDHAR
+# CODE AUTHORED BY ARJUN SRIDHAR, ASHEN FERNANDO
 # PARTS OF CODE ADAPTED FROM: https://www.pyimagesearch.com/2017/04/24/eye-blink-detection-opencv-python-dlib/
-# CODE THAT TRAINS AN SVM MODEL BASED ON EYE-ASPECT-RATIO (EAR) FEATURES AND RETURNS A CSV WITH BLINK CLASSIFICATIONS
+# CODE THAT CLASSIFIES USING EYE-ASPECT RATIO (EAR) METHOD USING STATIC THRESHOLD AND CONSECUTIVE NUMBER OF FRAMES
 # DEPENDENCIES - SHAPE PREDICTOR FILE, download here http://dlib.net/files/shape_predictor_68_face_landmarks.dat.bz
-# DEPENDENCIES - EAR_OPEN.CSV AND EAR_CLOSED.CSV TRAINING DATASETS
 
 # import the necessary packages
 import pandas as pd
-from sklearn.svm import SVC
-from scipy.spatial import distance as dist
 from imutils import face_utils
-import numpy as np
+from scipy.spatial import distance as dist
 import argparse
 import imutils
 import time
 import dlib
 import cv2
-from sklearn.model_selection import GridSearchCV
 import time
-
-# function that merges the training data from the open and closed eye training datasets
-# inputs - None
-# outputs - the dataframe with the merged data
-def merge_training_data():
-    ear_open = pd.read_csv('./ear_open.csv') # read in training data for open eyes
-    ear_closed = pd.read_csv('./ear_closed.csv') # read in training data for closed eyes
-    
-    training_data = pd.concat([ear_open, ear_closed])
-    
-    training_data = training_data[['EAR_Avg', 'Classification']]
-    
-    return training_data
-
-# trains the model using the 13 feature dimension
-# inputs - the training dataset
-# outputs - the model used for predicting
-def train_model(training_data):
-    X = training_data['EAR_Avg'].to_numpy()
-    
-    y = training_data['Classification'].to_numpy()
-    
-    y = y[6:] 
-    
-    X_train = np.zeros((len(X) - 6, 13)) # 13 feature dimension window for each training example
-    j = 0
-    
-    for i in range(6, len(X) - 6):
-        features = X[i - 6: i + 7]
-        X_train[j] = features # get 13 features for each training example
-        
-        j += 1
-    
-    params_grid = {'C': [0.001, 0.01, 0.1, 1, 10, 100, 1000, 10000],
-          #'gamma': [0.0001, 0.001, 0.01, 0.1],
-          'kernel':['linear']}
-    
-    svc = GridSearchCV(SVC(), params_grid) # train model using GridSearch to find best parameters
-    
-    print(np.shape(X_train))
-    print(np.shape(y))
-    svc.fit(X_train, y)
-    print(svc.best_params_)
-    return svc
+from sklearn.ensemble import IsolationForest
+import more_itertools as mit
 
 # computes the eye aspect ratio (EAR) value for the given eye frame
 # inputs - the eye frame 
@@ -78,10 +32,18 @@ def eye_aspect_ratio(eye):
     # return the eye aspect ratio
     return ear
 
+# runs the blink classification using the eye-aspect ration method
+# inputs - the command line arguments
+# outputs - the csv file with the blink classifications
+def predict(args): 
+    # define two constants, one for the eye aspect ratio to indicate
+    # blink and then a second constant for the number of consecutive
+    # frames the eye must be below the threshold
+    EYE_AR_THRESH = 0.2
+    EYE_AR_CONSEC_FRAMES = 3
+    # initialize the frame counters and the total number of blinks
+    COUNTER = 0
 
-def predict(args):
-    model = train_model(merge_training_data())    
-    
     # initialize dlib's face detector (HOG-based) and then create
     # the facial landmark predictor
     print("[INFO] loading facial landmark predictor...")
@@ -100,7 +62,8 @@ def predict(args):
     
     face = cv2.imread('../resources/face.jpg')
     
-    ear_test = []
+    ear_values = []
+    blink_flags = []
     frames = []
     
     k = 0
@@ -158,31 +121,97 @@ def predict(args):
             cv2.drawContours(frame, [leftEyeHull], -1, (0, 255, 0), 1)
             cv2.drawContours(frame, [rightEyeHull], -1, (0, 255, 0), 1)
             
-            ear_test.append(ear)
+            # check to see if the eye aspect ratio is below the blink
+            # threshold, and if so, increment the blink frame counter
+            # if ear < EYE_AR_THRESH:
+            #     COUNTER += 1
+            #     blink_flags.append(0)
+            #     # otherwise, the eye aspect ratio is not below the blink threshold
+            # else:
+            #     # if the eyes were closed for consecutive number of blinks - classify as blink
+            #     if COUNTER >= EYE_AR_CONSEC_FRAMES:
+            #         blink_flags.append(1)
+            #     else:
+            #         blink_flags.append(0)
+                
+            #     # reset the eye frame counter
+            #     COUNTER = 0
+                    
+            ear_values.append(ear)
             frames.append('Frame%d' %(k))
             
             k = k + 1
     
-    data_dict = {'Frame':[], 'EAR_Avg': [], 'Classification': []}
+    # cnt = 0
+    # for flag in blink_flags:
+    #     if flag == 1:
+    #         cnt += 1
+    # print(cnt)
+    # data for output to be stored
+    data_dict = {'Frame': frames, 'EAR_Avg': ear_values}
     
     # do a bit of cleanup
     cv2.destroyAllWindows()
-    #vs.stop()
     
-    #prediction = []
-    
-    for i in range(6, len(ear_test) - 6):
-        feature_test = np.array(ear_test[i - 6: i + 7])
-        
-        prediction = model.predict(feature_test.reshape((1, 13)))[0]
-        
-        data_dict['Frame'].append(frames[i])
-        data_dict['EAR_Avg'].append(ear_test[i])
-        data_dict['Classification'].append(prediction)
-    
+    # create dataframe and write output
     df = pd.DataFrame.from_dict(data_dict)
-    df.to_csv('./svm.csv', index=False)
+
+    return df
+    # df.to_csv('./ear_static.csv', index=False)
+
+def findOutliers(data):
+
+    # number of standard deviations away from the rolling mean 
+    devs = 3
+
+    # size of the rolling window
+    roll_window = 100
+
+    # duration to be classified as a blink, in multiples of 20, eg. dur=2 means >=60ms or ([2+1]*20) ms. Time resolution is 20 ms
+    dur = 2
+
+    # pot_outliers will contain points below 3 sigma away from rolling EAR_Avg 
+    rolling = data['EAR_Avg'].rolling(roll_window).mean()
+    rolling_std = rolling - devs*rolling.std()
+
+    pot_outliers = data.loc[data['EAR_Avg'] < rolling_std]
+
+    # a first order estimation of contamination, a ratio of data 3 sigma away from mean to total data
+    contam = len(pot_outliers)/len(data)
+
+    # implement isolation forest
+    data_np = data['EAR_Avg'].to_numpy().reshape(-1,1)
+
+    model = IsolationForest(n_estimators=100, max_samples='auto', contamination=contam)
+
+    fit = model.fit(data_np)
+    decision = model.decision_function(data_np)
+    pred = model.predict(data_np)
+
+    # separate outliers (with a score of -1) from normal samples
+
+    isf = pd.DataFrame({'dec':decision, 'pred':pred})
+
+    ears = pd.DataFrame({'inds':isf.loc[isf['pred'] == -1].index, 'EAR_vals':data['EAR_Avg'][isf.loc[isf['pred'] == -1].index]})
+    ears = ears[ears['EAR_vals'] < ears['EAR_vals'].mean()]
+
+    # creates a list of lists that keeps track of groups of consecutive records
+    blinks_list_iso = [list(group) for group in mit.consecutive_groups(ears.index)]
+
+    # counts the number of blinks and where they occur, given there are consecutive records (i.e. duration of the predicted blink) 
+    # is longer than metric specified by dur
+    count = 0
+    blinks_iso_grouped = []
     
+    for i in blinks_list_iso:
+        if len(i) > dur:
+            blinks_iso_grouped.append(i)
+            count += 1
+    
+    # flatten the grouped list, to be used for validation
+    flat_list = [item for sublist in blinks_iso_grouped for item in sublist]
+
+    print(blinks_iso_grouped)
 
 if __name__ == '__main__':
     # construct the argument parse and parse the arguments
@@ -193,5 +222,22 @@ if __name__ == '__main__':
         help="path to input video file")
     args = vars(ap.parse_args())
     start_time = time.time()
-    predict(args)
+    df = predict(args)
+    findOutliers(df)
     print("Time taken: ", time.time() - start_time, " s")
+
+
+
+
+
+
+
+    
+
+
+
+
+
+
+
+
