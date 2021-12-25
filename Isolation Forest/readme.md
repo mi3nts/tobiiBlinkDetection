@@ -1,1 +1,1 @@
-# Readme for Isolation Forest Algorithm
+# Readme for Isolation Forest method

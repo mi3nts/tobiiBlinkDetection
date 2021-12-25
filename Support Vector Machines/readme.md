@@ -1,1 +1,1 @@
-# Readme for SVM Algorithm
+# Readme for Support Vector Machine method

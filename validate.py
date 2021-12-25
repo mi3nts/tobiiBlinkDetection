@@ -31,15 +31,19 @@ def validateMethods(ground_truth, predictions):
     pred_num = len(blinks_grouped)
     
     # perform validation: see if a blink is predicted +-window_size frames around the ground truth blink record
-    
     window_size = 10
     for i in gt_close.index:
+
+        # create an array of -window_size to +window_size around the ground_truth blink
         i_range = np.arange(i-window_size,i+window_size+1)
+
+        # check if previous array has any overlap with list of predicted blinks
         if len(set(blinks_flat_list) & set(i_range)) > 0:
             tp += 1
         else:
             print(i, " is not predicted within given window size")
             fn += 1
+
 
     fp = pred_num - tp 
     tn = len(predictions) - fp - tp - fn
