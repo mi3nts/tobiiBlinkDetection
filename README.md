@@ -9,7 +9,11 @@ The methods are:
 - Support Vector Machines
 - Isolation Forest
 
-To reproduce the paper's results, one may clone the repo and simply run validate.py, as each method's respective predictions are provided. 
+To reproduce the paper's results, one may clone the repo and simply run 
+```
+validate.py
+```
+ as each method's respective predictions are provided. 
 
 To make new predictions, simply navigate to the desired method's directory (eg. SVM) and execute as follows:
 ```python
