@@ -146,7 +146,7 @@ def predict(args):
             cnt += 1
     print(cnt)
     # data for output to be stored
-    data_dict = {'Frame': frames, 'EAR_Avg': ear_values, 'Blink_Flag': blink_flags}
+    data_dict = {'Frame': frames, 'EAR_Avg': ear_values, 'Classification': blink_flags}
     
     # do a bit of cleanup
     cv2.destroyAllWindows()

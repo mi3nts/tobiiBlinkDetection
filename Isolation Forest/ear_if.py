@@ -5,6 +5,7 @@
 
 # import the necessary packages
 import pandas as pd
+from scipy.sparse.construct import random
 from imutils import face_utils
 from scipy.spatial import distance as dist
 import argparse
@@ -15,6 +16,7 @@ import cv2
 import time
 from sklearn.ensemble import IsolationForest
 import more_itertools as mit
+import numpy as np
 
 # computes the eye aspect ratio (EAR) value for the given eye frame
 # inputs - the eye frame 
@@ -182,7 +184,7 @@ def findOutliers(data):
     # implement isolation forest
     data_np = data['EAR_Avg'].to_numpy().reshape(-1,1)
 
-    model = IsolationForest(n_estimators=100, max_samples='auto', contamination=contam)
+    model = IsolationForest(n_estimators=100, max_samples='auto', contamination=contam, random_state=42)
 
     fit = model.fit(data_np)
     decision = model.decision_function(data_np)
@@ -208,10 +210,18 @@ def findOutliers(data):
             blinks_iso_grouped.append(i)
             count += 1
     
-    # flatten the grouped list, to be used for validation
+    # flatten the grouped list, to be used for validation 
     flat_list = [item for sublist in blinks_iso_grouped for item in sublist]
 
-    print(blinks_iso_grouped)
+    # return a dataframe/csv with with 'Frame', 'EAR_Avg', 'Classification'
+    data_dict = {'Frame': np.arange(0,len(data)), 'EAR_Avg': data['EAR_Avg'], 'Classification': np.zeros(len(data), dtype='int')}
+
+    data_df = pd.DataFrame.from_dict(data_dict)
+
+    # index into df using flat list (which has correct blink flags) to set classification value to true
+    data_df['Classification'].loc[data_df.index[flat_list]] = 1
+
+    data_df.to_csv("if.csv", index=False)
 
 if __name__ == '__main__':
     # construct the argument parse and parse the arguments

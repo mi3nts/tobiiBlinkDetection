@@ -181,6 +181,8 @@ def predict(args):
         data_dict['Classification'].append(prediction)
     
     df = pd.DataFrame.from_dict(data_dict)
+    df['Classification'] = df['Classification'].replace("Open",0)
+    df['Classification'] = df['Classification'].replace("Closed",1)
     df.to_csv('./svm.csv', index=False)
     
 
