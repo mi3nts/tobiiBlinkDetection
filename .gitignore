@@ -1,6 +1,6 @@
 algorithm4
 resources/shape_predictor_68_face_landmarks.dat
 resources/twitter_eyesstream.mp4
-Baseline/ear_static.csv
-Support Vector Machines/svm.csv
-Isolation Forest/if.csv
+# Baseline/ear_static.csv
+# Support Vector Machines/svm.csv
+# Isolation Forest/if.csv
