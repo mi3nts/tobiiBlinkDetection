@@ -22,6 +22,6 @@ validate.py
 
 To make new predictions, simply navigate to the desired method's directory (eg. SVM) and execute as follows:
 ```python
-python ear_svm.py -p resources/shape_predictor_68_face_landmarks.dat -v resources/twitter_eyesstream.mp4
+python ear_svm.py -p ../resources/shape_predictor_68_face_landmarks.dat -v ../resources/twitter_eyesstream.mp4
 ```
 
