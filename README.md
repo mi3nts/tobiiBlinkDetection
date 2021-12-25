@@ -3,7 +3,12 @@ Blink detection methods for Tobii Pro Glasses 2 data
 
 This repo acts as both an implementation of methods proposed in the paper "Unsupervised Blink Detection Using Eye Aspect Ratio Values" and a validation of the results provided. 
 
-The methods are:
+To recreate the environment using conda:
+```
+conda env create -f environment.yml
+```
+
+The methods used are labeled as:
 
 - Baseline 
 - Support Vector Machines
