@@ -1,4 +1,4 @@
-# tobiiBlinkDetection and Validation 
+# Tobii Pro Glasses 2 Blink Detection and Validation 
 Blink detection methods for Tobii Pro Glasses 2 data
 
 This repo acts as both an implementation of methods proposed in the paper "Unsupervised Blink Detection Using Eye Aspect Ratio Values" and a validation of the results provided. 
