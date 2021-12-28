@@ -31,7 +31,7 @@ def validateMethods(ground_truth, predictions):
     pred_num = len(blinks_grouped)
     
     # perform validation: see if a blink is predicted +-window_size frames around the ground truth blink record
-    window_size = 10
+    window_size = 6
     for i in gt_close.index:
 
         # create an array of -window_size to +window_size around the ground_truth blink
