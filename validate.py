@@ -5,7 +5,7 @@ import pandas as pd
 def f_score(tp, fp, fn):
     return tp/(tp+(0.5*(fp+fn)))
 
-window_size = 0
+window_size = 6
 
 def validateMethods(ground_truth, predictions):
     
@@ -33,8 +33,8 @@ def validateMethods(ground_truth, predictions):
     pred_num = len(blinks_grouped)
     
     # perform validation: see if a blink is predicted +-window_size frames around the ground truth blink record
-    global window_size
-    window_size = 6
+    # global window_size
+    # window_size = 6
     for i in gt_close.index:
 
         # create an array of -window_size to +window_size around the ground_truth blink
