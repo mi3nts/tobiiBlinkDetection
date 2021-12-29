@@ -5,6 +5,8 @@ import pandas as pd
 def f_score(tp, fp, fn):
     return tp/(tp+(0.5*(fp+fn)))
 
+window_size = 0
+
 def validateMethods(ground_truth, predictions):
     
     # get predictions of blinks
