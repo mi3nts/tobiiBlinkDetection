@@ -69,8 +69,8 @@ if __name__ == '__main__':
     isof = pd.read_csv("Isolation Forest/if.csv")
     gt = pd.read_csv("resources/twitter_blink_groundtruth_all.csv")
 
-    print("\nNumber of ground truth blinks : ", len(gt.loc[gt['closed'] == 1]), "\n")
-    print(f"Window size for a frame to be classified as a blink: +-{window_size}")
+    print("\nNumber of ground truth blinks : ", len(gt.loc[gt['closed'] == 1]))
+    print("Window size for a frame to be classified as a blink: +-", window_size, "\n")
 
     methods = {"Baseline": static, "Support Vector Machines": svm, "Isolation Forest": isof}
 
