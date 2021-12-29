@@ -31,6 +31,7 @@ def validateMethods(ground_truth, predictions):
     pred_num = len(blinks_grouped)
     
     # perform validation: see if a blink is predicted +-window_size frames around the ground truth blink record
+    global window_size
     window_size = 6
     for i in gt_close.index:
 
@@ -67,6 +68,7 @@ if __name__ == '__main__':
     gt = pd.read_csv("resources/twitter_blink_groundtruth_all.csv")
 
     print("\nNumber of ground truth blinks : ", len(gt.loc[gt['closed'] == 1]), "\n")
+    print(f"Window size for a frame to be classified as a blink: +-{window_size}")
 
     methods = {"Baseline": static, "Support Vector Machines": svm, "Isolation Forest": isof}
 
