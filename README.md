@@ -8,6 +8,11 @@ To recreate the environment using conda:
 conda env create -f environment.yml
 ```
 
+If the conda environment doesn't create properly (likely due to cross-platform issues), simply install the **requirements.txt** file on a **python3.5** environment:
+```
+pip install -r requirements.txt
+```
+
 The methods used are labeled as:
 
 - Baseline 

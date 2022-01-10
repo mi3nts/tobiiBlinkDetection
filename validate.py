@@ -6,8 +6,14 @@ def f_score(tp, fp, fn):
     return tp/(tp+(0.5*(fp+fn)))
 
 window_size = 6
-
 def validateMethods(ground_truth, predictions):
+
+    # SVM predicts 6 records less (not specified by window size), so all methods are configured to have same number of ground truth and predictions
+    if len(predictions) < len(ground_truth):   
+        ground_truth = ground_truth.iloc[6:len(predictions)+6,:]
+    else:
+        predictions = predictions.iloc[6:len(predictions)-6,:]
+        ground_truth = ground_truth.iloc[6:len(predictions)-6,:]
     
     # get predictions of blinks
     blinks = predictions[predictions['Classification'] == 1]
@@ -44,7 +50,7 @@ def validateMethods(ground_truth, predictions):
         if len(set(blinks_flat_list) & set(i_range)) > 0:
             tp += 1
         else:
-            print(i, " is not predicted within given window size")
+            print(f"Frame {i} is not predicted within given window size")
             fn += 1
 
 
@@ -70,7 +76,7 @@ if __name__ == '__main__':
     gt = pd.read_csv("resources/twitter_blink_groundtruth_all.csv")
 
     print("\nNumber of ground truth blinks : ", len(gt.loc[gt['closed'] == 1]))
-    print("Window size for a frame to be classified as a blink: +-", window_size, "\n")
+    print(f"Window size for a frame to be classified as a blink: +-{window_size}\n")
 
     methods = {"Baseline": static, "Support Vector Machines": svm, "Isolation Forest": isof}
 
