@@ -32,6 +32,6 @@ python ear_svm.py -p ../resources/shape_predictor_68_face_landmarks.dat -v ../re
 
 ### Resources
 
-To apply the unsupervised algorithm to new data, the additional resources are required. These can be readily obtained at the Zenodo datastore linked below.
+To apply the unsupervised algorithm to new data, additional resources are required. These can be readily obtained at the Zenodo datastore linked below.
 
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.5874701.svg)](https://doi.org/10.5281/zenodo.5874701)
